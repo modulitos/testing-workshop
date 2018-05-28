@@ -12,5 +12,8 @@ function getFormattedValue(value, language = 'en-US') {
   }
   return formattedValue
 }
+// if configuring environment to not load jsDOM, then set testEnvironment to "node" and
+// this should be undefined:
+// console.log(window)
 
 export {getFormattedValue}
