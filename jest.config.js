@@ -13,5 +13,7 @@ module.exports = {
       lines: 10,
     },
   },
+  // allows to run projects in parallel, each containing an entirely
+  // separate configuration:
   projects: ['./client', './server'],
 }
