@@ -5,6 +5,7 @@ import {Input, TextArea} from '../components/inputs'
 
 class Editor extends Component {
   handleSubmit = e => {
+    // throw new Error('here')
     e.preventDefault()
     const {title, content, tags} = e.target.elements
     const newPost = {
@@ -14,7 +15,9 @@ class Editor extends Component {
       date: new Date().toISOString(),
       authorId: this.props.user.id,
     }
+    // throw new Error(JSON.stringify({newPost}, null, 2))
     api.posts.create(newPost).then(() => {
+      // console.log('this.props.history:', this.props.history)
       this.props.history.push('/')
     })
   }
