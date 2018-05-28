@@ -1,9 +1,9 @@
 // using helpful utilities
 import React from 'react'
-import ReactDOM from 'react-dom'
+// import ReactDOM from 'react-dom'
 // you'll need these:
 // import {generate} from 'til-client-test-utils'
-// import {render, Simulate} from 'react-testing-library'
+import {render, Simulate} from 'react-testing-library'
 // note that til-client-test-utils is found in `client/test/til-client-test-utils`
 import Login from '../login'
 
@@ -16,22 +16,42 @@ test('calls onSubmit with the username and password when submitted', () => {
   // It'll give you back an object with
   // `getByLabelText` and `getByText` functions
   // so you don't need a div anymore!
-  const div = document.createElement('div')
-  ReactDOM.render(<Login onSubmit={handleSubmit} />, div)
+  // const div = document.createElement('div')
+  // ReactDOM.render(<Login onSubmit={handleSubmit} />, div)
 
-  const inputs = div.querySelectorAll('input')
-  const usernameNode = inputs[0]
-  const passwordNode = inputs[1]
-  const formNode = div.querySelector('form')
-  const submitButtonNode = div.querySelector('button')
+  const {container, getByLabelText, getByText} = render(
+    <Login onSubmit={handleSubmit} />,
+  )
 
-  usernameNode.value = fakeUser.username
-  passwordNode.value = fakeUser.password
+  // const inputs = div.querySelectorAll('input')
+  // const usernameNode = inputs[0]
+  // const passwordNode = inputs[1]
+  // const formNode = div.querySelector('form')
+  // const submitButtonNode = div.querySelector('button')
+
+  // it's still okay to use container.querySelector('form') here
+  // instead of getByText:
+  // can also pass regexes here (note this is case insensitive):
+  const submitButtonNode = getByText('Submit')
+  const formNode = container.querySelector('form')
+  getByLabelText('Username').value = fakeUser.username
+  getByLabelText('Password').value = fakeUser.password
 
   // Act
   // Use Simulate.submit(formNode) instead of these two lines
-  const event = new window.Event('submit')
-  formNode.dispatchEvent(event)
+  // const event = new window.Event('submit')
+  // formNode.dispatchEvent(event)
+
+  Simulate.submit(formNode)
+  // alternative, by passing in the event data directly:
+  // Simulate.submit(formNode, {
+  //   target: {
+  //     elements: {
+  //       username: {value: fakeUser.username},
+  //       password: {value: fakeUser.password},
+  //     },
+  //   },
+  // })
 
   // Assert
   // no change necessary here
@@ -49,8 +69,8 @@ test('calls onSubmit with the username and password when submitted', () => {
 /*
 http://ws.kcd.im/?ws=Testing&e=login.step-2%20(react-testing-library)&em=
 */
-test.skip('I submitted my elaboration and feedback', () => {
-  const submitted = false // change this when you've submitted!
+test('I submitted my elaboration and feedback', () => {
+  const submitted = true // change this when you've submitted!
   expect(submitted).toBe(true)
 })
 ////////////////////////////////

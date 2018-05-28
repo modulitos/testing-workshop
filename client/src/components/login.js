@@ -8,6 +8,7 @@ function Login({onSubmit}) {
       <Form
         onSubmit={e => {
           e.preventDefault()
+          // console.log('e.target.elements:', e.target.elements)
           const {username, password} = e.target.elements
           onSubmit({
             username: username.value,
