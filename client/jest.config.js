@@ -8,6 +8,8 @@ module.exports = {
   setupTestFrameworkScriptFile: require.resolve(
     './test/setup-test-framework.js',
   ),
+  // import modules in these dirs as if they were regular npm modules:
+  // (highly recommended to have some test helpers like these.)
   modulePaths: ['<rootDir>/src', '<rootDir>/test'],
   moduleNameMapper: {
     '\\.svg$': '<rootDir>/test/svg-file-mock.js',

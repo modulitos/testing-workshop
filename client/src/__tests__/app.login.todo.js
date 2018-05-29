@@ -1,6 +1,69 @@
+import React from 'react'
+import App from '../app'
+import axiosMock from 'axios'
+import {Simulate} from 'react-testing-library'
+import {renderWithRouter, generate} from 'til-client-test-utils'
+import {init as initAPI} from '../utils/api'
+
 // add a beforeEach for cleaning up state and intitializing the API
+beforeEach(() => {
+  window.localStorage.removeItem('token')
+  axiosMock.__mock.reset()
+  initAPI()
+})
 
 test('login as an existing user', async () => {
+  const {
+    container,
+    getByLabelText,
+    getByTestId,
+    getByText,
+    finishLoading,
+  } = renderWithRouter(<App />)
+
+  await finishLoading()
+
+  const leftClick = {button: 0}
+  const loginButton = getByText('login')
+  // NOTE: Simulate is overly complicated and it's probably best to
+  // just load the form into the dom and then actually first a "click"
+  // event on the loginButton:
+  // This is here because React attaches a single event handler for
+  // every event type on the document, so any event will bubble up to
+  // that single event handler. It was used for perf resaons, but
+  // browsers are much faster and it's really not needed.
+  Simulate.click(loginButton, leftClick)
+  expect(window.location.href).toContain('login')
+
+  const fakeUser = generate.loginForm()
+  const formWrapper = container.querySelector('form')
+  const {post} = axiosMock.__mock.instance
+  const token = generate.token(fakeUser)
+  post.mockImplementationOnce(
+    () =>
+      Promise.resolve({
+        data: {user: {...fakeUser, token}},
+      }),
+    // NOTE: can simulate an error message from api via:
+    // Promise.reject({ ..})
+  )
+  getByLabelText('Username').value = fakeUser.username
+  getByLabelText('Password').value = fakeUser.password
+  // NOTE: Simulate is overly complicated and it's probably best to
+  // just load the form into the dom and then actually first a "click"
+  // event on the loginButton:
+  Simulate.submit(formWrapper)
+
+  await finishLoading()
+
+  expect(post).toHaveBeenCalledTimes(1)
+  expect(post).toHaveBeenCalledWith('/auth/login', fakeUser)
+
+  expect(window.localStorage.getItem('token')).toBe(token)
+  expect(window.location.href).not.toContain('login')
+  expect(getByTestId('username-display').textContent).toEqual(fakeUser.username)
+  expect(getByText('Logout')).toBeTruthy()
+
   // render the app with the router provider and custom history
   //
   // wait for the app to finish loading the mocked requests
@@ -34,8 +97,8 @@ test('login as an existing user', async () => {
 /*
 http://ws.kcd.im/?ws=Testing&e=app.login&em=
 */
-test.skip('I submitted my elaboration and feedback', () => {
-  const submitted = false // change this when you've submitted!
+test('I submitted my elaboration and feedback', () => {
+  const submitted = true // change this when you've submitted!
   expect(submitted).toBe(true)
 })
 ////////////////////////////////
