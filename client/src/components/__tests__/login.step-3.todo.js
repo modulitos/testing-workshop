@@ -1,7 +1,13 @@
 // dealing with react's simulated events
 import React from 'react'
 import {generate} from 'til-client-test-utils'
-import {render, Simulate} from 'react-testing-library'
+import {
+  cleanup,
+  renderIntoDocument,
+  render,
+  Simulate,
+  fireEvent,
+} from 'react-testing-library'
 import Login from '../login'
 
 // Due to the fact that our element is not in the document, the
@@ -22,28 +28,55 @@ import Login from '../login'
 // Extra bonus, rather than manually inserting the container into the document
 // check out the docs for react-testing-library and the renderIntoDocument method!
 
-test('calls onSubmit with the username and password when submitted', () => {
+afterEach(cleanup)
+
+test('calls onSubmit with the username and password when submitted 3', () => {
   // Arrange
   const fakeUser = generate.loginForm()
   const handleSubmit = jest.fn()
-  const {container, getByLabelText, getByText} = render(
+  // const {container, getByLabelText, getByText} = render(
+  const {container, getByLabelText, getByText, unmount} = renderIntoDocument(
     <Login onSubmit={handleSubmit} />,
   )
 
   const usernameNode = getByLabelText('username')
   const passwordNode = getByLabelText('password')
-  const formNode = container.querySelector('form')
+  // const formNode = container.querySelector('form')
   const submitButtonNode = getByText('submit')
 
   // Act
   usernameNode.value = fakeUser.username
   passwordNode.value = fakeUser.password
-  Simulate.submit(formNode)
+
+  // do this:
+  // document.body.appendChild(container)
+  // getByText('submit').click()
+  // or this:
+  fireEvent.click(getByText('submit'))
+  // which is analogous to `submitNode.dispatchEvent(new Event('click'))`
+  // or `Simulate.click(submitNode)`
+
+  // instead of this:
+  // Simulate.submit(formNode)
 
   // Assert
   expect(handleSubmit).toHaveBeenCalledTimes(1)
   expect(handleSubmit).toHaveBeenCalledWith(fakeUser)
-  expect(submitButtonNode.type).toBe('submit')
+  // don't need this, b/c the button was clicked and triggered a
+  // submit:
+  // expect(submitButtonNode.type).toBe('submit')
+
+  // // this unmounts the component, but doesn't actually unmount the
+  // // container:
+  // unmount()
+  // // to make sure we cleaned everythign up:
+  // document.body.innerHTML = ''
+  // // or use the `afterEach(cleanup)` util.
+})
+
+test.skip('cleanup', () => {
+  // check to see that our form was cleaned up:
+  console.log('docuement.body.innerHTML:', document.body.innerHTML)
 })
 
 //////// Elaboration & Feedback /////////
@@ -55,8 +88,8 @@ test('calls onSubmit with the username and password when submitted', () => {
 /*
 http://ws.kcd.im/?ws=Testing&e=login.step-3%20(renderIntoDocument)&em=
 */
-test.skip('I submitted my elaboration and feedback', () => {
-  const submitted = false // change this when you've submitted!
+test('I submitted my elaboration and feedback', () => {
+  const submitted = true // change this when you've submitted!
   expect(submitted).toBe(true)
 })
 ////////////////////////////////
